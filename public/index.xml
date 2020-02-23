@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>No Signal</title>
+    <link>http://nosignal.io/</link>
+    <description>Recent content on No Signal</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © 2008–2019, Paul Stevens; all rights reserved.</copyright>
+    <lastBuildDate>Sun, 23 Feb 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://nosignal.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>About</title>
+      <link>http://nosignal.io/about/</link>
+      <pubDate>Sun, 23 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://nosignal.io/about/</guid>
+      <description>I&amp;rsquo;m a Site Reliability Engineer based in London, UK. After spending most of my career in telecoms, I find myself working in the fintech space, which brings with it a different set of challenges for both the development and the operational management of the platforms I am responsible for.
+Common stack these days includes:
+ AWS Kubernetes Prometheus Go Linux  Outside of the office, I&amp;rsquo;m getting into photography and enjoy drinking in the history of London and the rest of the UK, as well as travel throughout Europe.</description>
+    </item>
+    
+    <item>
+      <title>Links</title>
+      <link>http://nosignal.io/links/</link>
+      <pubDate>Sun, 23 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>http://nosignal.io/links/</guid>
+      <description>A collection of links to my favourite sites, subscriptions and content.
+Favorite sites Hacker News</description>
+    </item>
+    
+  </channel>
+</rss>

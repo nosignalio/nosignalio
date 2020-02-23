@@ -1,3 +1,91 @@
-baseURL = "http://example.org/"
-languageCode = "en-us"
-title = "My New Hugo Site"
+baseURL = "http://nosignal.io/"
+title = "No Signal"
+copyright = "Copyright © 2008–2019, Paul Stevens; all rights reserved."
+paginate = 2
+languageCode = "en"
+DefaultContentLanguage = "en"
+enableInlineShortcodes = true
+footnoteReturnLinkContents = "^"
+googleAnalytics = ""
+DisqusShortname = ""
+theme = "chunky-poster"
+
+[menu]
+  [[menu.main]]
+    identifier = "home"
+    name = "Home"
+    url = "/"
+    weight = 10
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 0
+  [[menu.main]]
+    identifier = "links"
+    name = "Links"
+    url = "/links/"
+
+[taxonomies]
+category = "categories"
+tag = "tags"
+series = "series"
+author = "authors"
+
+[params]
+  author = "Paul Stevens"
+  description = "building and tinkering"
+  homepageImage = "/images/homepage-image.jpg"
+  share = true
+  showLanguageSwitcher = false
+
+  [params.social]
+    rss = true
+    email = "ps@nosignal.io"
+    linkedin = "https://www.linkedin.com/in/paul-stevens-uk/"
+    # stack-overflow = "https://stackoverflow.com"
+    instagram = "https://www.instagram.com/nosignalio/"
+    github = "https://github.com/nosignalio"
+    # reddit = "https://reddit.com"
+    keybase = "https://keybase.io/nosignalio"
+
+  [params.prismJS]
+    enable = true
+    theme = ""
+
+  [params.commento]
+    enable = true
+    url = "https://commento.io"
+
+[markup]
+  [markup.highlight]
+    codeFences = false
+
+[services]
+  [services.instagram]
+    disableInlineCSS = true
+
+  [services.twitter]
+    disableInlineCSS = true
+
+[deployment]
+order = [".jpg$", ".gif$"]
+
+[[deployment.targets]]
+URL = "s3://nosignal.io?region=eu-west-2"
+cloudFrontDistribution = "E1JEO7SFELVIWA"
+
+[[deployment.matchers]]
+#  Cache static assets for 1 year.
+pattern = "^.+\\.(js|css|svg|ttf)$"
+cacheControl = "max-age=31536000, no-transform, public"
+gzip = true
+
+[[deployment.matchers]]
+pattern = "^.+\\.(png|jpg)$"
+cacheControl = "max-age=31536000, no-transform, public"
+gzip = false
+
+[[deployment.matchers]]
+pattern = "^.+\\.(html|xml|json)$"
+gzip = true
