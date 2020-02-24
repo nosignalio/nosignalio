@@ -25,6 +25,7 @@ theme = "chunky-poster"
     identifier = "links"
     name = "Links"
     url = "/links/"
+    weight = 0
 
 [taxonomies]
 category = "categories"

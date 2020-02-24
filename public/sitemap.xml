@@ -3,6 +3,16 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>http://nosignal.io/post/</loc>
+    <lastmod>2020-02-24T11:05:45+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://nosignal.io/post/s3-cloudfront-static-site/</loc>
+    <lastmod>2020-02-24T11:05:45+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://nosignal.io/about/</loc>
     <lastmod>2020-02-23T00:00:00+00:00</lastmod>
   </url>

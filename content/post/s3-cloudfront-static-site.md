@@ -1,7 +1,7 @@
 ---
 title: "S3 Cloudfront Static Site"
 date: 2020-02-24T11:05:45Z
-draft: true
+draft: false
 ---
 
 Confession: I struggle with AWS services, in that I don't find them that

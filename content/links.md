@@ -2,7 +2,6 @@
 title = "Links"
 description = "Building and tinkering"
 date = "2020-02-23"
-aliases = ["links"]
 author = "Hugo Authors"
 +++
 

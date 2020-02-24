@@ -2,7 +2,6 @@
 title = "About"
 description = "Building and tinkering"
 date = "2020-02-23"
-aliases = ["about-us"]
 author = "Hugo Authors"
 +++
 

@@ -13,6 +13,17 @@
     
     
     <item>
+      <title>S3 Cloudfront Static Site</title>
+      <link>http://nosignal.io/post/s3-cloudfront-static-site/</link>
+      <pubDate>Mon, 24 Feb 2020 11:05:45 +0000</pubDate>
+      
+      <guid>http://nosignal.io/post/s3-cloudfront-static-site/</guid>
+      <description>Confession: I struggle with AWS services, in that I don&amp;rsquo;t find them that intuitive to use, and mostly default to bouncing around trying to figure out which switches and dials to tweak in order to derive a desirable result.
+That said, the complexity results in the ability to build some powerful services pretty darn quickly when compared with attempting to orchestrate similar solutions on your own.
+My most recent foray into AWS (outside of the office) was getting this site running.</description>
+    </item>
+    
+    <item>
       <title>About</title>
       <link>http://nosignal.io/about/</link>
       <pubDate>Sun, 23 Feb 2020 00:00:00 +0000</pubDate>
@@ -30,7 +41,7 @@ Common stack these days includes:
       
       <guid>http://nosignal.io/links/</guid>
       <description>A collection of links to my favourite sites, subscriptions and content.
-Favorite sites Hacker News</description>
+Favorite sites  Hacker News  Languages  Go Python Ruby  Mathematics  Mathematics for the adventurous self-learner  Resources  In-depth guide to running Elastic in production  </description>
     </item>
     
   </channel>

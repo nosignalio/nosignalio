@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>No Signal</title><meta name="description" content="building and tinkering"><meta name="author" content="Paul Stevens">
+
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.min.css">
+    
+
+
+
+    
+        
+            <link rel="stylesheet" href="/dist/main.37ab3f61b95417873748.min.css">
+        
+    
+
+
+<link rel="canonical" href="http://nosignal.io/post/s3-cloudfront-static-site/"><meta property="og:title" content="S3 Cloudfront Static Site" />
+<meta property="og:description" content="Confession: I struggle with AWS services, in that I don&rsquo;t find them that intuitive to use, and mostly default to bouncing around trying to figure out which switches and dials to tweak in order to derive a desirable result.
+That said, the complexity results in the ability to build some powerful services pretty darn quickly when compared with attempting to orchestrate similar solutions on your own.
+My most recent foray into AWS (outside of the office) was getting this site running." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://nosignal.io/post/s3-cloudfront-static-site/" />
+<meta property="article:published_time" content="2020-02-24T11:05:45+00:00" />
+<meta property="article:modified_time" content="2020-02-24T11:05:45+00:00" />
+<meta itemprop="name" content="S3 Cloudfront Static Site">
+<meta itemprop="description" content="Confession: I struggle with AWS services, in that I don&rsquo;t find them that intuitive to use, and mostly default to bouncing around trying to figure out which switches and dials to tweak in order to derive a desirable result.
+That said, the complexity results in the ability to build some powerful services pretty darn quickly when compared with attempting to orchestrate similar solutions on your own.
+My most recent foray into AWS (outside of the office) was getting this site running.">
+<meta itemprop="datePublished" content="2020-02-24T11:05:45&#43;00:00" />
+<meta itemprop="dateModified" content="2020-02-24T11:05:45&#43;00:00" />
+<meta itemprop="wordCount" content="685">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="S3 Cloudfront Static Site"/>
+<meta name="twitter:description" content="Confession: I struggle with AWS services, in that I don&rsquo;t find them that intuitive to use, and mostly default to bouncing around trying to figure out which switches and dials to tweak in order to derive a desirable result.
+That said, the complexity results in the ability to build some powerful services pretty darn quickly when compared with attempting to orchestrate similar solutions on your own.
+My most recent foray into AWS (outside of the office) was getting this site running."/>
+
+</head>
+<body>
+    
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow-sm" id="navbar-main-menu">
+    <div class="container">
+        <a class="navbar-brand font-weight-bold" href="http://nosignal.io/">No Signal</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-menu">
+            <ul class="navbar-nav ml-auto">
+                
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                
+                    <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
+                
+                    <li class="nav-item"><a class="nav-link" href="/links/">Links</a></li>
+                
+            
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    
+<main class="content-page container pt-7 pb-5">
+    
+    <div class="row">
+        <div class="col">
+            <article>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="meta text-muted mb-3">
+                            <p class="created text-muted text-uppercase font-weight-bold mb-1">February 24, 2020</p>
+                            <span class="mr-2"><i class="fas fa-book-open mr-2"></i>685 words</span>
+                            <span><i class="fas fa-clock mr-2"></i>4 mins read</span>
+                        </div>
+
+                        <h1>S3 Cloudfront Static Site</h1>
+
+                        
+                    </div>
+                </div><div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="content">
+                            <p>Confession: I struggle with AWS services, in that I don&rsquo;t find them that
+intuitive to use, and mostly default to bouncing around trying to figure out
+which switches and dials to tweak in order to derive a desirable result.</p>
+<p>That said, the complexity results in the ability to build some powerful services
+pretty darn quickly when compared with attempting to orchestrate similar solutions
+on your own.</p>
+<p>My most recent foray into AWS (outside of the office) was getting this site running.
+I&rsquo;d previously hosted iterations of it on a Digital Ocean Kubernetes cluster,
+but ultimately figured that spending in excess of $40 per month on a site that
+nobody reads a bit silly. Next, I went for a GitHub Pages derivative. That
+just works, but when considering things to play with the future, I figured that
+I&rsquo;d end up running some services out of AWS anyway&hellip;so why not just run the
+site there?</p>
+<p>The concept of running a static site on S3 is not new, nor is the idea of
+fronting it with a CloudFront distribution. What I hadn&rsquo;t figured on was just
+how much time I&rsquo;d spend scratching my head saying &ldquo;wut?&rdquo; while getting it going.</p>
+<p>Here&rsquo;s what I ended up with.</p>
+<h3 id="route53">Route53</h3>
+<p>This is relatively simple. Once you have CloudFront configured, you&rsquo;re going to
+be using <code>alias</code> records which point your apex and a <code>www</code> record to CF.</p>
+<h3 id="s3">S3</h3>
+<p>I created two buckets. One is called <code>www.nosignal.io</code> and simply redirects traffic
+to the primary bucket that contains the code, called <code>nosignal.io</code>.</p>
+<p>Under properties for <code>www.nosignal.io</code>, <strong>Static website hosting</strong> is enabled,
+with <strong>Redirect requests</strong> set to:</p>
+<ul>
+<li><code>Target bucket or domain: nosignal.io</code></li>
+<li><code>Protocol: https</code></li>
+</ul>
+<p>The properties for <code>nosignal.io</code> have <strong>Use this bucket to host a website</strong> set,
+with the <code>index document</code> and <code>error document</code> properties set.</p>
+<p>Under permissions (for both buckets), I have <strong>Block all public access</strong> enabled.
+The only service that I want to be able to access my content is CloudFront. This
+should reduce the risk of any silliness whereby content could be pulled from S3
+in sufficient enough volumes to cause me any financial misery, and means that
+anything added to S3 is only accessible via the CDN that CloudFront provides.</p>
+<p>Under <strong>Permissions</strong>, I have the Canonical ID of the S3 Origin from CloudFront
+set to <strong>List Objects</strong>. This effectively allows CloudFront read access to the
+bucket.</p>
+<p>Under <strong>Bucket Policy</strong>, I have the following:</p>
+<pre><code class="language-json">{
+    &quot;Version&quot;: &quot;2012-10-17&quot;,
+    &quot;Id&quot;: &quot;PolicyForCloudFrontPrivateContent&quot;,
+    &quot;Statement&quot;: [
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Principal&quot;: {
+                &quot;AWS&quot;: &quot;arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity XXXXXXXXXXXXXX&quot;
+            },
+            &quot;Action&quot;: &quot;s3:GetObject&quot;,
+            &quot;Resource&quot;: &quot;arn:aws:s3:::nosignal.io/*&quot;
+        }
+    ]
+}
+</code></pre>
+<h3 id="cloudfront">CloudFront</h3>
+<p>I opted for a single CloudFront distribution that uses all edge locations and has
+<code>CNAMEs</code> configured for <code>nosignal.io</code> and <code>www.nosignal.io</code>. After multiple bites
+of the cherry in getting AWS Certificate Manager to issue a cert and <em>then</em> use it
+in my CloudFront distribution, I ultimately ended up using the Distribution creation
+wizard to request a certificate (also mapped to the apex and <code>www</code> names of my site).
+Another tweak was to set the Security Policy to TLSv1.2_2018 and above, as well
+as set the <code>Default Root Object</code> to <code>index.html</code>.</p>
+<p>Under <strong>Origins and Origin Groups</strong>, I have <code>nosignal.io.s3.amazonaws.com</code> and
+<code>www.nosignal.io.s3.amazonaws.com</code> which map to their respective Origin Domain
+Names and use an identity created (AFAIK) during the creation of the Distribution.</p>
+<p>Withion <strong>Behaviors</strong> I have a single <code>Default (*)</code> behaviour that maps to the
+S3 bucket of my apex domain (which contains all of the content).</p>
+<p>It is under <strong>Origin Access Identity</strong> under CF that you can find the
+<code>Amazon S3 Canonical User ID</code> I references under <code>S3 &gt; Permissions</code> to allow
+CF originated requests read access to the S3 buckets.</p>
+<h3 id="broken-as-of-24-02-2020">Broken as of 24-02-2020</h3>
+<p>I can&rsquo;t get to my <code>/about/</code> and <code>/links</code> paths because the routing doesn&rsquo;t
+know what <code>/about/index.html</code> is. This is a known behaviour of CloudFront. From
+my brief reading into solutions, it seems that I can either implement a LambdaEdge
+function to enrich request routing or enable <code>uglyurls</code> in Hugo. It just works
+when you&rsquo;re accessing the site directly from S3, so whatever I do I&rsquo;ll need to
+do with CloudFront. I&rsquo;ll update this when I fix the issue.</p>
+
+                        </div><ul class="share nav my-3 justify-content-end">
+        <li class="nav-item">
+            <a class="nav-link" target="_blank" href="https://twitter.com/intent/tweet?url=http%3a%2f%2fnosignal.io%2fpost%2fs3-cloudfront-static-site%2f&text=S3%20Cloudfront%20Static%20Site">
+              <i class="fa-fw fab fa-twitter"></i>
+          </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" target="_blank" href="https://www.linkedin.com/shareArticle?url=http%3a%2f%2fnosignal.io%2fpost%2fs3-cloudfront-static-site%2f&title=S3%20Cloudfront%20Static%20Site">
+                <i class="fa-fw fab fa-linkedin-in"></i>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" target="_blank" href="https://www.facebook.com/sharer.php?u=http%3a%2f%2fnosignal.io%2fpost%2fs3-cloudfront-static-site%2f&t=S3%20Cloudfront%20Static%20Site">
+                <i class="fa-fw fab fa-facebook-f"></i>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" target="_blank" href="https://reddit.com/submit?url=http%3a%2f%2fnosignal.io%2fpost%2fs3-cloudfront-static-site%2f&title=S3%20Cloudfront%20Static%20Site">
+                <i class="fa-fw fab fa-reddit-alien"></i>
+            </a>
+        </li>
+    </nav>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        
+                    </div>
+                </div><div class="row justify-content-center my-3">
+                    <div class="col-lg-8">
+                        <div id="commento"></div>
+                        <script src="https://commento.io"></script>
+                    </div>
+                </div></article>
+        </div>
+    </div>
+
+    
+</main>
+
+
+    <footer class="footer text-center bg-dark py-6">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="http://nosignal.io/index.xml" rel="alternate" type="application/rss+xml" class="icons d-block">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a></li><li class="list-inline-item">
+                        <a href="mailto://ps@nosignal.io" class="icons d-block">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li><li class="list-inline-item">
+                            <a href="https://github.com/nosignalio" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li><li class="list-inline-item">
+                            <a href="https://www.instagram.com/nosignalio/" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-instagram fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li><li class="list-inline-item">
+                            <a href="https://keybase.io/pstoken" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-keybase fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li><li class="list-inline-item">
+                            <a href="https://www.linkedin.com/in/paul-stevens-uk/" class="icons d-block">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                </ul>
+
+                <p class="text-muted">
+                    
+                        Copyright © 2008–2019, Paul Stevens; all rights reserved.
+                    
+                </p>
+
+                <p class="text-muted">
+                Powered by <a href="https://gohugo.io" target="_blank">Hugo</a> with <a href="https://github.com/puresyntax71/hugo-theme-chunky-poster" target="_blank">Chunky Poster</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    
+    
+        
+            <script src="/dist/main.2ed44664366c9940537d.min.js"></script>
+        
+    
+
+
+
+<script>
+    window.Prism = window.Prism || {};
+    window.Prism.manual = true;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+
+
+    
+</body>
+</html>
