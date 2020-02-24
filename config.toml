@@ -47,7 +47,7 @@ author = "authors"
     instagram = "https://www.instagram.com/nosignalio/"
     github = "https://github.com/nosignalio"
     # reddit = "https://reddit.com"
-    keybase = "https://keybase.io/nosignalio"
+    keybase = "https://keybase.io/pstoken"
 
   [params.prismJS]
     enable = true
