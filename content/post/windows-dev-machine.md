@@ -1,7 +1,7 @@
 ---
 title: "Windows Dev Machine Pt I"
 date: 2020-02-24T17:22:02Z
-draft: true
+draft: false
 ---
 
 This isn't a story about how macOS is suddenly horrible or how Linux makes for
