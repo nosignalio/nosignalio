@@ -33,7 +33,7 @@ That said, the complexity results in the ability to build some powerful services
 My most recent foray into AWS (outside of the office) was getting this site running.">
 <meta itemprop="datePublished" content="2020-02-24T11:05:45&#43;00:00" />
 <meta itemprop="dateModified" content="2020-02-24T11:05:45&#43;00:00" />
-<meta itemprop="wordCount" content="685">
+<meta itemprop="wordCount" content="1230">
 
 
 
@@ -78,8 +78,8 @@ My most recent foray into AWS (outside of the office) was getting this site runn
                     <div class="col-lg-8">
                         <div class="meta text-muted mb-3">
                             <p class="created text-muted text-uppercase font-weight-bold mb-1">February 24, 2020</p>
-                            <span class="mr-2"><i class="fas fa-book-open mr-2"></i>685 words</span>
-                            <span><i class="fas fa-clock mr-2"></i>4 mins read</span>
+                            <span class="mr-2"><i class="fas fa-book-open mr-2"></i>1230 words</span>
+                            <span><i class="fas fa-clock mr-2"></i>6 mins read</span>
                         </div>
 
                         <h1>S3 Cloudfront Static Site</h1>
@@ -160,13 +160,73 @@ S3 bucket of my apex domain (which contains all of the content).</p>
 <p>It is under <strong>Origin Access Identity</strong> under CF that you can find the
 <code>Amazon S3 Canonical User ID</code> I references under <code>S3 &gt; Permissions</code> to allow
 CF originated requests read access to the S3 buckets.</p>
-<h3 id="broken-as-of-24-02-2020">Broken as of 24-02-2020</h3>
-<p>I can&rsquo;t get to my <code>/about/</code> and <code>/links</code> paths because the routing doesn&rsquo;t
-know what <code>/about/index.html</code> is. This is a known behaviour of CloudFront. From
-my brief reading into solutions, it seems that I can either implement a LambdaEdge
-function to enrich request routing or enable <code>uglyurls</code> in Hugo. It just works
-when you&rsquo;re accessing the site directly from S3, so whatever I do I&rsquo;ll need to
-do with CloudFront. I&rsquo;ll update this when I fix the issue.</p>
+<h3 id="fixing-directory-indexing">Fixing Directory Indexing</h3>
+<p>When you direct requests to an S3 bucket from CloudFront, those requests don&rsquo;t
+read the objects from your bucket, they&rsquo;re fetched from the S3 REST API. For this
+reason, a request to <code>/about/</code> will read from <code>/about/index.html</code>, but fails to
+render as CloudFront isn&rsquo;t reading the file, it&rsquo;s reading an <code>index.html</code> object
+hanging off of the <code>about</code> object from an API request. To get around this, you
+can either switch off the protections that make CloudFront the default read
+resource for your bucket, or you can enable <code>uglyurls</code> in Hugo, or you can set up
+a Lambda@Edge function to handle the request translation for you.</p>
+<p>I opted for a Lambda@Edge function. The basic code (direct from AWS) looks as
+follows:</p>
+<pre><code class="language-javascript">'use strict';
+exports.handler = (event, context, callback) =&gt; {
+
+    // Extract the request from the CloudFront event that is sent to Lambda@Edge
+    var request = event.Records[0].cf.request;
+
+    // Extract the URI from the request
+    var olduri = request.uri;
+
+    // Match any '/' that occurs at the end of a URI. Replace it with a default index
+    var newuri = olduri.replace(/\/$/, '\/index.html');
+
+    // Log the URI as received by CloudFront and the new URI to be used to fetch from origin
+    console.log(&quot;Old URI: &quot; + olduri);
+    console.log(&quot;New URI: &quot; + newuri);
+
+    // Replace the received URI with the URI that includes the index page
+    request.uri = newuri;
+
+    // Return to CloudFront
+    return callback(null, request);
+
+};
+</code></pre>
+<p>It simply plugs <code>index.html</code> onto the end of a request so that the required
+object can be rendered in the browser.</p>
+<p>To set one up, make sure that your region is <strong>US East (N. Virginia)</strong>. Any other
+region won&rsquo;t show the required CloudFront trigger. Head over to Lambda and
+create a new function. Choose <strong>Author from scratch</strong>, name your function, choose
+<strong>Node.js 10.x</strong> as your runtime and then select <strong>Create a new role from AWS policy
+templates</strong>. Give your new role a name, and then select <strong>Basic Lambda@Edge permissions
+(for CloudFront tigger)</strong> and select <strong>Create Function</strong>.</p>
+<p>Once the designer screen opens, click <strong>Add trigger</strong> and select <strong>CloudFront</strong>. Then
+select <strong>Deploy to Lambda@Edge</strong>. This will create a layer in the Designer view
+named after your function. Paste the code above into the <code>index.js</code> editor
+window and save your code. You can then click on the <strong>Actions</strong> drop down and
+select <strong>Deploy to Lambda@Edge</strong>. You may as well wander off at this point,
+as your CloudFront Distribution is kicking off an update. As soon as your
+Distribution has been updated, your site should be working as expected.</p>
+<h3 id="in-summary">In summary</h3>
+<p>It took me a couple of hours to figure out S3 + AWS Certificate Manager +
+CloudFront + Lambda@Edge. Getting this done as a GitHub Pages site with an SSL
+cert mapped to my custom domain takes a few minutes. Even getting this done on a
+three node k8s cluster on DigitalOcean with some scripts to turn a <code>hugo</code> build
+command into content on a custom Nginx image took a day of fiddling, and that
+included writing all of the YAML, getting Nginx ingress working and hooking up
+cert-manager.</p>
+<p>So where&rsquo;s the benefit to this? My job here is now done. I have no further
+maintenance to undertake. My site is deployed on the CDN of one of the largest
+networks on the planet. It&rsquo;s delivered over HTTPS. I haven&rsquo;t had to open my
+S3 bucket to the world. If I ever write something that ends up on the front page
+of <a href="https://news.ycombinator.com">Hacker News</a>, I don&rsquo;t need to think about scale.
+If I decided to muck around with some JavaScript to talk to backend services,
+I have one of the largest toolboxes of toys to leverage. Going forward,
+updates are as simple as <code>write</code> → <code>hugo server -D</code> → <code>hugo</code> → <code>hugo deploy</code>.
+Probably.</p>
 
                         </div><ul class="share nav my-3 justify-content-end">
         <li class="nav-item">
